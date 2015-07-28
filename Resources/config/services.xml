@@ -1,0 +1,40 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+        <parameter key="flash_message_handler.flash_message_event_handler.class">MCadare\FlashMessageHandler\Service\FlashMessageEventHandler</parameter>
+        <parameter key="flash_message_handler.session_flash_message_service.class">MCadare\Symfony\FlashMessageHandlerBundle\Service\SessionFlashMessageService</parameter>
+        <parameter key="flash_message_handler.flash_message_factory.class">MCadare\FlashMessageHandler\Factory\FlashMessageFactory</parameter>
+        <parameter key="flash_message_handler.flash_message_event_factory.class">MCadare\Symfony\FlashMessageHandlerBundle\Factory\FlashMessageSymfonyEventFactory</parameter>
+        <parameter key="flash_bag.class">Symfony\Component\HttpFoundation\Session\Flash</parameter>
+    </parameters>
+    <services>
+        <service id="flash_message_handler.flash_message_event_handler" class="%flash_message_handler.flash_message_event_handler.class%">
+            <argument>%flash_messages%</argument>
+            <call method="setFlashMessageService">
+                <argument type="service" id="flash_message_handler.session_flash_message_service" />
+            </call>
+            <call method="setFlashMessageFactory">
+                <argument type="service" id="flash_message_handler.flash_message_factory" />
+            </call>
+            <tag name="kernel.event_listener" event="flash.message" method="handle" />
+        </service>
+
+        <service id="flash_message_handler.session_flash_message_service" class="%flash_message_handler.session_flash_message_service.class%">
+            <call method="setFlashBagService">
+                <argument type="service" id="flash_bag" />
+            </call>
+        </service>
+
+        <service id="flash_message_handler.flash_message_factory" class="%flash_message_handler.flash_message_factory.class%" />
+
+        <service id="flash_message_handler.flash_message_event_factory" class="%flash_message_handler.flash_message_event_factory.class%" />
+        <service id="mcadare.flash_message_event_factory" alias="flash_message_handler.flash_message_event_factory" />
+
+        <service id="flash_bag" class="%flash_bag.class%" factory-service="session" factory-method="getFlashBag"/>
+    </services>
+
+</container>
